@@ -39,9 +39,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.flatpages',
+<<<<<<< HEAD
     'fpages',
     'News_portal',
     'simpleapp'
+=======
+    'fpages'
+>>>>>>> 347c22d59bd8b9727c69e9d88786c8a3e0bf222b
 ]
 
 SITE_ID = 1
@@ -134,3 +138,9 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+<<<<<<< HEAD
+=======
+STATICFILES_DIRS = [
+    BASE_DIR / "static"
+]
+>>>>>>> 347c22d59bd8b9727c69e9d88786c8a3e0bf222b
