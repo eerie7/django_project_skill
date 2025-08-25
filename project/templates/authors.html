@@ -1,0 +1,32 @@
+{% extends 'flatpages/default.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}
+Authors
+{% endblock title %}
+
+{% block content %}
+<big>
+    {% if authors %}
+        <table width="100%">
+            <tr>
+                <th><big><big>Наши авторы:</big></big></th>
+                <th><big><big>Рейтинг</big></big></th>
+            </tr>
+            {% for author in authors %}
+            <tr>
+                <td>
+                    <a href="/authors/{{ author.id }}/">
+                        <big>{{ author.author_name }}</big>
+                    </a>
+                </td>
+                <td><big><strong>★{{ author.rating }}</strong></big></td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p><big><big>Авторы не найдены</big></big></p>
+    {% endif %}
+</big>
+{% endblock content %}

@@ -1,0 +1,42 @@
+{% extends 'flatpages/default.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}
+{{ post.title }}
+{% endblock title %}
+
+{% block content %}
+<big>
+
+    <div style="text-align: center;">
+        <h1 style="display: inline; margin-right: 15px;">
+            <big><big>{{ post.title|censor }}</big></big>
+        </h1>
+        <span style="font-size: 1.2em; font-weight: bold;">★{{ post.rating }}</span>
+    </div>
+
+
+    <div>
+        <br><p><big>{{ post.content|censor }}</big></p>
+    </div>
+
+
+    <div align="right">
+        <br><p><big><em>{{ post.author.author_name }} <small><br>Опубликовано: {{post.date|date:"d.m.Y"}}</small></em></big></p>
+    </div>
+</big>
+
+
+    <div style="margin-top: 30px;">
+        <br><br><h3>Комментарии:</h3>
+        {% for comment in post.comment_set.all %}
+            <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0; text-align: left;">
+                <p style="margin: 0; text-align: left;"><strong>{{ comment.user.username|censor }}</strong>: {{ comment.comment|censor }}</p>
+                <small style="text-align: left;">Опубликован: {{ comment.date|date:"d.m.Y" }}</small>
+            </div>
+        {% empty %}
+            <p>Пока нет комментариев.</p>
+        {% endfor %}
+    </div>
+{% endblock content %}

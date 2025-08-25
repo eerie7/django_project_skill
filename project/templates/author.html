@@ -1,0 +1,52 @@
+{% extends 'flatpages/default.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}
+{{ author.author_name }}
+{% endblock title %}
+
+{% block content %}
+<div class="author-header">
+    <h1>{{ author.author_name }}</h1>
+    <div class="rating">
+        <span class="stars">★★★★★</span>
+        <span class="rating-value">{{ author.rating }}</span>
+    </div>
+</div>
+
+<div class="author-posts">
+    <br><h2>Посты автора:</h2><br>
+    <div style="display: flex; justify-content: space-between;">
+        <!-- Колонка с новостями -->
+        <div style="width: 48%;">
+            <h3>Новости</h3>
+            {% for post in author.post_set.all %}
+                {% if post.get_post_type_display == "Новость" %}
+                    <div class="post-item">
+                        <h4>
+                            <a href="/news/{{ post.id }}/">{{ post.title|truncatechars:30 }}</a>
+                            <small>★ {{ post.rating }} | {{ post.date|date:"d.m.Y" }}</small>
+                        </h4>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+
+        <div style="width: 48%;">
+            <h3>Статьи</h3>
+            {% for post in author.post_set.all %}
+                {% if post.get_post_type_display == "Статья" %}
+                    <div class="post-item">
+                        <h4>
+                            <a href="/articles/{{ post.id }}/">{{ post.title|truncatechars:30 }}</a>
+                            <small>★ {{ post.rating }} | {{ post.date|date:"d.m.Y" }}</small>
+                        </h4>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock content %}
