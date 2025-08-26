@@ -5,6 +5,11 @@
 {% endblock title %}
 
 {% block content %}
-{{ flatpage.title }}
-{{ flatpage.content }}
+    <div style="text-align: center; margin-top: 50px;">
+        <h1>{{ flatpage.title }}</h1>
+        <hr style="width: 50%; margin: 20px auto;">
+        <div style="font-size: 18px; line-height: 1.6;">
+            {{ flatpage.content }}
+        </div>
+    </div>
 {% endblock content %}
