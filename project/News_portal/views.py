@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.shortcuts import render
-from django.views.generic import ListView, DetailView
-
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from .forms import PostForm
 from .filters import PostFilter
 from .models import Post, Author, Category, Comment
 
@@ -72,3 +72,19 @@ class PostDetail(DetailView):
     context_object_name = 'post'
 
 
+class PostCreate(CreateView):
+    # Указываем нашу разработанную форму
+    form_class = PostForm
+    # модель товаров
+    model = Post
+    # и новый шаблон, в котором используется форма.
+    template_name = 'post_edit.html'
+
+
+class PostUpdate(UpdateView):
+    # Указываем нашу разработанную форму
+    form_class = PostForm
+    # модель товаров
+    model = Post
+    # и новый шаблон, в котором используется форма.
+    template_name = 'post_edit.html'
