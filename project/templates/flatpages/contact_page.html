@@ -6,10 +6,10 @@
 {% endblock title %}
 
 {% block content %}
-    <br><h2 style="text-align: center;">{{ flatpage.title }}<img src="https://html5-editor.net/tinymce/plugins/emoticons/img/smiley-innocent.gif" alt="innocent" /></h2>
-    <hr />
-    <h3 style="text-align: center;"><em>Наши контакты:</em></h3>
-    <p style="text-align: center;"><span style="color: #ff0000;"><strong>{{ flatpage.content }}</strong></span></p>
-    <p>&nbsp;</p>
-    <p>&nbsp;</p>
+    <div class="text-center">
+        <br><h1>{{ flatpage.title }}<img src="https://html5-editor.net/tinymce/plugins/emoticons/img/smiley-innocent.gif" alt="innocent" /></h1>
+        <hr>
+        <div style="font-weight: normal !important; font-size: 24px; margin-bottom: 10px;">Наши контакты:</div>
+        <div style="font-weight: normal !important; font-size: 24px;">{{ flatpage.content }}</div>
+    </div>
 {% endblock content %}

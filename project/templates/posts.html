@@ -1,0 +1,117 @@
+{% extends 'flatpages/default.html' %}
+{% load static %}
+{% load custom_filters %}
+{% load custom_tags %}
+
+{% block title %}
+Все публикации
+{% endblock title %}
+
+{% block content %}
+<style>
+    .post-link {
+        color: black;
+        text-decoration: none;
+    }
+    .post-link:hover {
+        color: black;
+        text-decoration: underline;
+    }
+    .author-name {
+        color: black;
+        text-decoration: none;
+        font-style: italic;
+    }
+    .author-name:hover {
+        text-decoration: underline;
+    }
+     .filter-form {
+        position: absolute;  /* Позиционирование формы */
+        top: 60px;          /* Отступ сверху */
+        right: 20px;        /* Отступ справа */
+        background: #f9f9f9; /* Фон формы */
+        padding: 10px;      /* Уменьшенные внутренние отступы */
+        border: 1px solid #ddd; /* Рамка */
+        border-radius: 6px; /* Немного меньше закругленные углы */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Тень */
+        width: 150px;       /* Ширина формы */
+    }
+
+    .filter-form label {
+        display: block;     /* Каждый label на отдельной строке */
+        margin-bottom: 5px; /* Отступ между label и input */
+        font-size: 14px;    /* Уменьшенный размер шрифта */
+    }
+
+    .filter-form input,
+    .filter-form select,
+    .filter-form button {
+        width: 100%;        /* Ширина полей и кнопки */
+        padding: 6px;       /* Уменьшенные внутренние отступы */
+        margin-bottom: 8px; /* Уменьшенный отступ между элементами */
+        border: 1px solid #ccc; /* Рамка */
+        border-radius: 4px; /* Закругленные углы */
+        font-size: 14px;    /* Уменьшенный размер шрифта */
+    }
+
+    .filter-form button {
+        background-color: #007bff; /* Цвет кнопки */
+        color: white;              /* Цвет текста */
+        border: none;              /* Убираем рамку */
+        cursor: pointer;           /* Курсор в виде руки */
+        padding: 6px 12px;         /* Уменьшенные отступы кнопки */
+        font-size: 14px;           /* Уменьшенный размер шрифта */
+    }
+
+    .filter-form button:hover {
+        background-color: #0056b3; /* Цвет кнопки при наведении */
+    }
+
+
+</style>
+
+<h1>Все публикации</h1>
+
+<form action="" method="get" class="filter-form">
+    {{ filterset.form.as_p }}
+    <input type="submit" value="Найти" />
+</form>
+<!-- Общий список всех постов -->
+<div class="all-posts">
+    {% for post in posts %}
+        <div class="post-item">
+            <big>
+                <!-- Ссылка на пост (новость или статью) -->
+                <a href="{% if post.get_post_type_display == 'Новость' %}/news/{{ post.id }}/{% else %}/articles/{{ post.id }}/{% endif %}"
+                   class="post-link">
+                    {{ post.title|truncatechars:50 }}
+                </a>
+                <!-- Ссылка на профиль автора -->
+                <a href="/authors/{{ post.author.id }}/" class="author-name">({{ post.author.author_name }})</a>
+                <!-- Рейтинг и дата -->
+                <span class="post-meta">★ {{ post.rating }} | {{ post.date|date:"d.m.Y" }}</span>
+            </big>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Пагинация -->
+{% if page_obj.has_previous %}
+    <a href="?{% url_replace page=1 %}">1</a>
+    {% if page_obj.previous_page_number != 1 %}
+        ...
+        <a href="?{% url_replace page=page_obj.next_page_number %}">{{ page_obj.previous_page_number }}</a>
+    {% endif %}
+{% endif %}
+
+{{ page_obj.number }}
+
+{% if page_obj.has_next %}
+    <a href="?{% url_replace page=page_obj.next_page_number %}">{{ page_obj.next_page_number }}</a>
+    {% if paginator.num_pages != page_obj.next_page_number %}
+        ...
+        <a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a>
+    {% endif %}
+{% endif %}
+
+{% endblock content %}

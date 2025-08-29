@@ -17,23 +17,21 @@ breaking = 'BR'
 economy = 'EC'
 
 
-categories = [
-    (sport, 'SP'),
-    (politics, 'PO'),
-    (education, 'ED'),
-    (showbusiness, 'SH'),
-    (breaking, 'BR'),
-    (economy, 'EC')
-]
-
-
-
-
 class Category(models.Model):
-    category_name = models.CharField(max_length=2, choices=categories, unique=True)
+    CATEGORIES = [
+        ('sport', 'Спорт'),
+        ('politics', 'Политика'),
+        ('education', 'Образование'),
+        ('showbiz', 'Шоубизнес'),
+        ('breaking_news', 'Срочные новости'),
+        ('economy', 'Экономика'),
+    ]
+
+    category_name = models.CharField(max_length=50, choices=CATEGORIES, unique=True)
 
     def __str__(self):
         return self.get_category_name_display()
+
 
 class Author(models.Model):
     id = models.AutoField(primary_key=True)

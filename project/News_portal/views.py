@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView
+
+from .filters import PostFilter
 from .models import Post, Author, Category, Comment
 
 
@@ -10,25 +12,46 @@ class AuthorList(ListView):
     ordering = 'author_name'
     template_name = 'authors.html'
     context_object_name = 'authors'
+    paginate_by = 15
+
 
 class AuthorDetail(DetailView):
     model = Author
     template_name = 'author.html'
     context_object_name = 'author'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all()  # Передача всех категорий в контекст
+
+        # Получение выбранной категории из запроса
+        selected_category = self.request.GET.get('category')
+        # Фильтрация постов автора по выбранной категории
+        if selected_category:
+            context['posts'] = self.object.post_set.filter(categories__id=selected_category)
+        else:
+            context['posts'] = self.object.post_set.all()
+
+        return context
+
 
 class PostsList(ListView):
-    # Указываем модель, объекты которой мы будем выводить
     model = Post
-    # Поле, которое будет использоваться для сортировки объектов
     ordering = '-date'
-    # Указываем имя шаблона, в котором будут все инструкции о том,
-    # как именно пользователю должны быть показаны наши объекты
     template_name = 'posts.html'
-    # Это имя списка, в котором будут лежать все объекты.
-    # Его надо указать, чтобы обратиться к списку объектов в html-шаблоне.
     context_object_name = 'posts'
+    paginate_by = 10
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        self.filterset = PostFilter(self.request.GET, queryset)
+        return self.filterset.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Добавляем в контекст объект фильтрации.
+        context['filterset'] = self.filterset
+        return context
 
 class CategoryList(ListView):
     model = Category
