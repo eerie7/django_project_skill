@@ -1,0 +1,78 @@
+{% extends 'flatpages/default.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}
+{{ post.title }}
+{% endblock title %}
+
+{% block content %}
+<style>
+ .author-link {
+        color: black;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .author-link:hover {
+        color: #333;
+        text-decoration: underline;
+    }
+
+    .category {
+        font-weight: bold;
+        font-size: 0.9em;
+        color: black;
+        text-align: left;
+        margin-top: 5px;
+    }
+</style>
+
+<big>
+<div style="text-align: center;">
+    <h1 style="display: inline; margin-right: 15px;">
+        <br><big><big>{{ post.title|censor }}</big></big>
+    </h1>
+    <span style="font-size: 1.2em; font-weight: bold;">★{{ post.rating }}</span>
+</div>
+
+<div>
+    <br><p><big>{{ post.content|censor }}</big></p>
+</div>
+
+<div align="right">
+    <br>
+    <p><em>
+        <a href="/authors/{{ post.author.id }}/" class="author-link">
+            {{ post.author.author_name }}
+        </a>
+        <br><small>Опубликовано: {{ post.date|date:"d.m.Y" }}</small>
+    </em></p>
+
+    <div>
+        <span class="category">
+            {% for category in post.categories.all %}
+                {{ category.get_category_name_display }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        </span>
+    </div>
+</div>
+
+</big>
+
+<div style="margin-top: 30px;">
+    <br><br><h3>Комментарии:</h3>
+    {% for comment in post.comment_set.all %}
+        <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0; text-align: left;">
+            <p style="margin: 0; text-align: left;">
+                <a href="/authors/{{ comment.user.id }}/" class="author-link">
+                    <strong>{{ comment.user.username|censor }}</strong>
+                </a>: {{ comment.comment|censor }}
+            </p>
+            <small style="text-align: left;">Опубликован: {{ comment.date|date:"d.m.Y" }}</small>
+        </div>
+    {% empty %}
+        <p>Пока нет комментариев.</p>
+    {% endfor %}
+</div>
+{% endblock content %}

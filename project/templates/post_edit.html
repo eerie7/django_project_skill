@@ -1,0 +1,20 @@
+{% extends 'flatpages/default.html' %}
+
+{% block content %}
+<h1>
+    {% if object %}
+        Редактирование {{ object.get_post_type_display }}
+    {% else %}
+        Создание нового поста
+    {% endif %}
+</h1>
+<hr>
+<form action="" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="{% if object %}Сохранить{% else %}Создать{% endif %}" />
+</form>
+
+<!-- Универсальная кнопка назад -->
+<a href="/">На главную</a>
+{% endblock content %}

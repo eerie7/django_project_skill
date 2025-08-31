@@ -1,0 +1,68 @@
+{% extends 'flatpages/default.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}
+Authors
+{% endblock title %}
+
+{% block content %}
+<style>
+    .author-link {
+        color: black;
+        text-decoration: none;
+    }
+
+    .author-link:hover {
+        color: black;
+        text-decoration: underline;
+    }
+</style>
+
+<big>
+    {% if authors %}
+        <table width="100%">
+            <tr>
+                <br><th><big><big>Наши авторы:</big></big></th>
+                <th><big><big>Рейтинг</big></big></th>
+            </tr>
+            {% for author in authors %}
+            <tr>
+                <td>
+                    <a href="/authors/{{ author.id }}/" class="author-link">
+                        <big>{{ author.author_name }}</big>
+                    </a>
+                </td>
+                <td><big><strong>★{{ author.rating }}</strong></big></td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p><big><big>Авторы не найдены</big></big></p>
+    {% endif %}
+</big>
+
+ {# Добавляем пагинацию на страницу #}
+
+   {# Информация о предыдущих страницах #}
+   {% if page_obj.has_previous %}
+       <a href="?page=1">1</a>
+       {% if page_obj.previous_page_number != 1 %}
+           ...
+           <a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+       {% endif %}
+   {% endif %}
+
+   {# Информация о текущей странице #}
+   {{ page_obj.number }}
+
+   {# Информация о следующих страницах #}
+   {% if page_obj.has_next %}
+       <a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+       {% if paginator.num_pages != page_obj.next_page_number %}
+           ...
+           <a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+       {% endif %}
+   {% endif %}
+
+{% endblock content %}

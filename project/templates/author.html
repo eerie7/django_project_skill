@@ -1,0 +1,110 @@
+{% extends 'flatpages/default.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}
+{{ author.author_name }}
+{% endblock title %}
+
+{% block content %}
+<style>
+    .post-link {
+        color: black;
+        text-decoration: none;
+    }
+
+    .post-link:hover {
+        color: black;
+        text-decoration: underline;
+    }
+</style>
+<div class="author-header">
+    <br><h1>{{ author.author_name }}</h1>
+    <div class="rating">
+        <span class="stars">★★★★★</span>
+        <span class="rating-value">{{ author.rating }}</span>
+    </div>
+</div>
+<div class="author-posts">
+    <br><h2>Публикации автора:</h2>
+
+    <form method="get" action="">
+        <label for="category">Категория публикаций:</label>
+        <select name="category" id="category" onchange="this.form.submit()">
+            <option value="">Все</option>
+            {% for category in categories %}
+                <option value="{{ category.id }}"
+                    {% if category.id|stringformat:"i" == request.GET.category %} selected {% endif %}>
+                    {{ category.get_category_name_display }}
+                </option>
+            {% endfor %}
+        </select>
+    </form><br>
+
+    <div style="display: flex; justify-content: space-between;">
+        <!-- Колонка с новостями -->
+        <div style="width: 48%;">
+            <h3>Новости</h3>
+            {% for post in posts %}
+                {% if post.get_post_type_display == "Новость" %}
+                    <div class="post-item">
+                        <big>
+                            <a href="/news/{{ post.id }}/" class="post-link">{{ post.title|truncatechars:30 }}</a>
+                            <span class="post-meta">★ {{ post.rating }} | {{ post.date|date:"d.m.Y" }}</span>
+                            <span class="category">
+                                {% for category in post.categories.all %}
+                                    {{ category.get_category_name_display }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </span>
+                        </big>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div style="width: 48%;">
+            <h3>Статьи</h3>
+            {% for post in posts %}
+                {% if post.get_post_type_display == "Статья" %}
+                    <div class="post-item">
+                        <big>
+                            <a href="/articles/{{ post.id }}/" class="post-link">{{ post.title|truncatechars:30 }}</a>
+                            <span class="post-meta">★ {{ post.rating }} | {{ post.date|date:"d.m.Y" }} |</span>
+                            <span class="category">
+                                {% for category in post.categories.all %}
+                                    {{ category.get_category_name_display }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </span>
+                        </big>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+ {# Добавляем пагинацию на страницу #}
+
+   {# Информация о предыдущих страницах #}
+   {% if page_obj.has_previous %}
+       <a href="?page=1">1</a>
+       {% if page_obj.previous_page_number != 1 %}
+           ...
+           <a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+       {% endif %}
+   {% endif %}
+
+   {# Информация о текущей странице #}
+   {{ page_obj.number }}
+
+   {# Информация о следующих страницах #}
+   {% if page_obj.has_next %}
+       <a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+       {% if paginator.num_pages != page_obj.next_page_number %}
+           ...
+           <a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+       {% endif %}
+   {% endif %}
+
+
+{% endblock content %}
+

@@ -1,0 +1,18 @@
+{% extends 'flatpages/default.html' %}
+{% load static %}
+
+{% block title %}
+{{ flatpage.title }}
+{% endblock title %}
+
+{% block content %}
+    <div style="text-align: center; margin-top: 20px;">
+        <h1>{{ flatpage.title }}</h1>
+        <hr style="width: 50%; margin: 20px auto;">
+        <div style="display: flex; justify-content: center;">
+            <div style="text-align: center; font-size: 18px; line-height: 2.0; color: inherit;">
+                <big><p>{{ flatpage.content|linebreaks }}</big></p>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
