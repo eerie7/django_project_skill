@@ -1,0 +1,104 @@
+{% extends 'flatpages/default.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h2>Личный кабинет</h2>
+    
+    {% if user.is_authenticated %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Информация о пользователе</h5>
+                <p><strong>Имя пользователя:</strong> {{ user.username }}</p>
+                <p><strong>Email:</strong> {{ user.email|default:"Не указан" }}</p>
+                <p><strong>Статус:</strong>
+                    {% if is_not_author %}
+                        <span class="badge badge-secondary">Обычный пользователь</span>
+                    {% else %}
+                        <span class="badge badge-success">Автор</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- Основные функции -->
+        <div class="row">
+            <!-- Создать пост -->
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Создать пост</h5>
+                        <p class="card-text">Написать новую статью или новость</p>
+                        {% if is_not_author %}
+                            <button class="btn btn-secondary" disabled>Требуется статус автора</button>
+                        {% else %}
+                            <a href="{% url 'post_create' %}" class="btn btn-primary">Создать</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Мои посты -->
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Мои посты</h5>
+                        <p class="card-text">Просмотр и управление вашими публикациями</p>
+                        {% if is_not_author %}
+                            <button class="btn btn-secondary" disabled>Требуется статус автора</button>
+                        {% else %}
+                           {% if user.get_author %}
+    <a href="{% url 'author_detail' pk=user.get_author.id %}" class="btn btn-info">Мой авторский профиль</a>
+{% else %}
+    <button class="btn btn-secondary" disabled>Авторский профиль не найден</button>
+{% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Настройки аккаунта -->
+<div class="col-md-4 mb-3">
+    <div class="card h-100">
+        <div class="card-body text-center">
+            <h5 class="card-title">Настройки аккаунта</h5>
+            <p class="card-text">Изменить email, пароль и другие данные</p>
+            <a href="{% url 'account_email' %}" class="btn btn-warning mb-2">Изменить Email</a>
+            <a href="{% url 'account_change_password' %}" class="btn btn-info mb-2">Изменить пароль</a>
+            <a href="{% url 'account_login' %}" class="btn btn-outline-secondary" style="display: none;">Другие настройки</a>
+        </div>
+    </div>
+</div>
+
+        <!-- Стать автором (для не-авторов) -->
+        {% if is_not_author %}
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <div class="alert alert-info">
+                    <h5>Стать автором</h5>
+                    <p>Получите права для создания и публикации постов</p>
+                    <a href="{% url 'upgrade' %}" class="btn btn-success">Стать автором!</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Выход -->
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <form method="post" action="{% url 'account_logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Выйти из аккаунта</button>
+                </form>
+            </div>
+        </div>
+
+    {% else %}
+        <div class="alert alert-warning">
+            <p>Вы не авторизованы.</p>
+            <a href="{% url 'login' %}" class="btn btn-primary">Войти</a>
+            <a href="{% url 'signup' %}" class="btn btn-success">Зарегистрироваться</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

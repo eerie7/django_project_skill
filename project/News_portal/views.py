@@ -5,21 +5,27 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from .forms import PostForm
 from .filters import PostFilter
 from .models import Post, Author, Category, Comment
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import TemplateView
+from django.views.generic.edit import CreateView
+from django.contrib.auth.mixins import PermissionRequiredMixin
 
 
 
-class AuthorList(ListView):
+class AuthorList(LoginRequiredMixin, ListView):
     model = Author
     ordering = 'author_name'
     template_name = 'authors.html'
     context_object_name = 'authors'
     paginate_by = 15
+    login_url = '/accounts/login/'
 
 
-class AuthorDetail(DetailView):
+class AuthorDetail(LoginRequiredMixin, DetailView):
     model = Author
     template_name = 'author.html'
     context_object_name = 'author'
+    login_url = '/accounts/login/'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -36,12 +42,13 @@ class AuthorDetail(DetailView):
         return context
 
 
-class PostsList(ListView):
+class PostsList(LoginRequiredMixin, ListView):
     model = Post
     ordering = '-date'
     template_name = 'posts.html'
     context_object_name = 'posts'
     paginate_by = 10
+    login_url = '/accounts/login/'
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -54,47 +61,63 @@ class PostsList(ListView):
         context['filterset'] = self.filterset
         return context
 
-class CategoryList(ListView):
+class CategoryList(LoginRequiredMixin, ListView):
     model = Category
     ordering = 'category_name'
     template_name = 'categories.html'
     context_object_name = 'categories'
+    login_url = '/accounts/login/'
 
 
-class CommentsList(ListView):
+class CommentsList(LoginRequiredMixin, ListView):
     model = Comment
     ordering = 'comment'
     template_name = 'comments.html'
     context_object_name = 'comments'
+    login_url = '/accounts/login/'
 
-class PostDetail(DetailView):
+class PostDetail(LoginRequiredMixin, DetailView):
     model = Post
     template_name = 'post_detail.html'
     context_object_name = 'post'
+    login_url = '/accounts/login/'
 
 
-class PostCreate(CreateView):
+# PostCreate(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
+    #permission_required = ('posts.add_post')
     # Указываем нашу разработанную форму
-    form_class = PostForm
+    #form_class = PostForm
     # модель товаров
-    model = Post
+    #model = Post
     # и новый шаблон, в котором используется форма.
-    template_name = 'post_edit.html'
-    success_url = reverse_lazy('post_list')
-
-class PostUpdate(UpdateView):
+    #template_name = 'post_edit.html'
+    #success_url = reverse_lazy('post_list')
+    #login_url = '/accounts/login/'
+class PostCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    permission_required = ('News_portal.add_post',)  # ← Запятая важна!
     form_class = PostForm
     model = Post
     template_name = 'post_edit.html'
+    success_url = reverse_lazy('post_list')  # Убедитесь что этот URL существует
+    login_url = '/accounts/login/'
+
+class PostUpdate(LoginRequiredMixin,PermissionRequiredMixin,UpdateView):
+    permission_required = ('posts.change_post')
+    form_class = PostForm
+    model = Post
+    template_name = 'post_edit.html'
+    login_url = '/login/'
 
     def get_success_url(self):
         # Определяем URL в зависимости от типа поста
         return reverse_lazy('author_detail', kwargs={'pk': self.object.author.pk})
 
 
-class PostDelete(DeleteView):
+class PostDelete(LoginRequiredMixin,PermissionRequiredMixin, DeleteView):
+    permission_required = ('posts.delete_post')
     model = Post
     template_name = 'post_delete.html'
+    login_url = '/accounts/login/'
 
     def get_success_url(self):
         # Определяем URL в зависимости от типа поста
