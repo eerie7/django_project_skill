@@ -49,6 +49,8 @@ INSTALLED_APPS = [
 
     # Провайдеры
     'allauth.socialaccount.providers.google',
+
+    'django_apscheduler'
 ]
 
 SITE_ID = 1
@@ -136,7 +138,8 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = True  # лучше оставить True для красоты
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'  # можно входить и по email и по username
-ACCOUNT_EMAIL_VERIFICATION = 'optional'
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
 
 # Дополнительные настройки для удобства
 ACCOUNT_SESSION_REMEMBER = True  # запоминать пользователя
@@ -174,3 +177,19 @@ SOCIALACCOUNT_PROVIDERS = {
 # Дополнительные настройки для socialaccount
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_STORE_TOKENS = False
+
+# Настройки email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'Pozetuve04@yandex.ru'
+EMAIL_HOST_PASSWORD = 'jreryiebtjhlvsjg'
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+DEFAULT_FROM_EMAIL = 'Pozetuve04@yandex.ru'
+SERVER_EMAIL = 'Pozetuve04@yandex.ru'
+
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+
+
+APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds

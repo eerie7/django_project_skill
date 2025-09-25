@@ -47,28 +47,28 @@
                         {% if is_not_author %}
                             <button class="btn btn-secondary" disabled>Требуется статус автора</button>
                         {% else %}
-                           {% if user.get_author %}
-    <a href="{% url 'author_detail' pk=user.get_author.id %}" class="btn btn-info">Мой авторский профиль</a>
-{% else %}
-    <button class="btn btn-secondary" disabled>Авторский профиль не найден</button>
-{% endif %}
+                            {% if user.author %}
+                                <a href="{% url 'author_detail' pk=user.author.id %}" class="btn btn-info">Мой авторский профиль</a>
+                            {% else %}
+                                <button class="btn btn-secondary" disabled>Авторский профиль не найден</button>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>
             </div>
 
             <!-- Настройки аккаунта -->
-<div class="col-md-4 mb-3">
-    <div class="card h-100">
-        <div class="card-body text-center">
-            <h5 class="card-title">Настройки аккаунта</h5>
-            <p class="card-text">Изменить email, пароль и другие данные</p>
-            <a href="{% url 'account_email' %}" class="btn btn-warning mb-2">Изменить Email</a>
-            <a href="{% url 'account_change_password' %}" class="btn btn-info mb-2">Изменить пароль</a>
-            <a href="{% url 'account_login' %}" class="btn btn-outline-secondary" style="display: none;">Другие настройки</a>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Настройки аккаунта</h5>
+                        <p class="card-text">Изменить email, пароль и другие данные</p>
+                        <a href="{% url 'account_email' %}" class="btn btn-warning mb-2">Изменить Email</a>
+                        <a href="{% url 'account_change_password' %}" class="btn btn-info mb-2">Изменить пароль</a>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
 
         <!-- Стать автором (для не-авторов) -->
         {% if is_not_author %}
@@ -82,6 +82,56 @@
             </div>
         </div>
         {% endif %}
+
+        <!-- Подписка на категории -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Подписки на категории</h5>
+                        <small class="text-muted">Вы будете получать уведомления о новых статьях в выбранных категориях</small>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Мои подписки -->
+                            <div class="col-md-6">
+                                <h6>Ваши подписки:</h6>
+                                {% if subscribed_categories %}
+                                    <div class="list-group">
+                                        {% for category in subscribed_categories %}
+                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>{{ category.get_category_name_display }}</span>
+                                                <a href="{% url 'unsubscribe_category' category.id %}" class="btn btn-sm btn-outline-danger">Отписаться</a>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted">Вы пока ни на что не подписаны</p>
+                                {% endif %}
+                            </div>
+
+                            <!-- Доступные категории -->
+                            <div class="col-md-6">
+                                <h6>Доступные категории:</h6>
+                                {% if available_categories %}
+                                    <div class="list-group">
+                                        {% for category in available_categories %}
+                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>{{ category.get_category_name_display }}</span>
+                                                <a href="{% url 'subscribe_category' category.id %}" class="btn btn-sm btn-success">Подписаться</a>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted">Нет доступных категорий для подписки</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <!-- Выход -->
         <div class="row mt-4">

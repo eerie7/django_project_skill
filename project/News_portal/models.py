@@ -10,12 +10,6 @@ from django.core.validators import MinValueValidator
 
 from django.template.defaultfilters import length
 
-sport = 'SP'
-politics = 'PO'
-education = 'ED'
-showbusiness = 'SH'
-breaking = 'BR'
-economy = 'EC'
 
 
 class Category(models.Model):
@@ -29,9 +23,17 @@ class Category(models.Model):
     ]
 
     category_name = models.CharField(max_length=50, choices=CATEGORIES, unique=True)
-
+    subscribers = models.ManyToManyField(User,through='CategorySubscription', blank=True, related_name='subscribers')
     def __str__(self):
         return self.get_category_name_display()
+
+class CategorySubscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'category')
 
 
 class Author(models.Model):

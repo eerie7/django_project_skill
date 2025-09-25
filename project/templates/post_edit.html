@@ -9,12 +9,98 @@
     {% endif %}
 </h1>
 <hr>
+
+<!-- Общие ошибки формы -->
+{% if form.non_field_errors %}
+    <div class="alert alert-danger">
+        <strong>Ошибки:</strong>
+        <ul>
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
 <form action="" method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="{% if object %}Сохранить{% else %}Создать{% endif %}" />
+
+    <!-- Тип поста -->
+    <div class="form-group">
+        <label for="id_post_type">Тип поста:</label>
+        {{ form.post_type }}
+        {% if form.post_type.errors %}
+            <div class="text-danger">
+                {% for error in form.post_type.errors %}
+                    <small>{{ error }}</small>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Заголовок -->
+    <div class="form-group">
+        <label for="id_title">Заголовок:</label>
+        {{ form.title }}
+        {% if form.title.errors %}
+            <div class="text-danger">
+                {% for error in form.title.errors %}
+                    <small>{{ error }}</small>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Содержание -->
+    <div class="form-group">
+        <label for="id_content">Содержание:</label>
+        {{ form.content }}
+        {% if form.content.errors %}
+            <div class="text-danger">
+                {% for error in form.content.errors %}
+                    <small>{{ error }}</small>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Автор -->
+    <div class="form-group">
+        <label for="id_author">Автор:</label>
+        {{ form.author }}
+        {% if form.author.errors %}
+            <div class="text-danger">
+                {% for error in form.author.errors %}
+                    <small>{{ error }}</small>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Категории -->
+    <div class="form-group">
+        <label><strong>Категории (можно выбрать несколько):</strong></label>
+        <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
+            {% for checkbox in form.categories %}
+                <div class="form-check">
+                    {{ checkbox.tag }}
+                    <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                        {{ checkbox.choice_label }}
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+        {% if form.categories.errors %}
+            <div class="text-danger">
+                {% for error in form.categories.errors %}
+                    <small>{{ error }}</small>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <input type="submit" value="{% if object %}Сохранить{% else %}Создать{% endif %}" class="btn btn-primary"/>
 </form>
 
-<!-- Универсальная кнопка назад -->
 <a href="/">На главную</a>
 {% endblock content %}

@@ -1,0 +1,15 @@
+Новый пост в категории "{{ category.get_category_name_display }}"
+
+Заголовок: {{ post.title }}
+Автор: {{ post.author.author_name }}
+Дата: {{ post.date|date:"d.m.Y H:i" }}
+Тип: {{ post.get_post_type_display }}
+
+Анонс:
+{{ post.preview }}
+
+Читать полностью: http://127.0.0.1:8000{{ post.get_absolute_url }}
+
+---
+Вы получили это письмо потому что подписаны на категорию "{{ category.get_category_name_display }}"
+Отписаться: http://127.0.0.1:8000/sign/unsubscribe/{{ category.id }}/

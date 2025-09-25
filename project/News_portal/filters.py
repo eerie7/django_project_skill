@@ -11,6 +11,12 @@ from django.db.models import Q
 
 
 class PostFilter(FilterSet):
+    category = ModelChoiceFilter(
+        field_name='categories',  # поле ManyToMany связи
+        queryset=Category.objects.all(),
+        label='Категория',
+        empty_label='Все категории'
+    )
     class Meta:
         model = Post
         fields = {
