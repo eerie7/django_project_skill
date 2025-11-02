@@ -11,6 +11,8 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import CategorySubscription
+from sign.views import notify_subscribers_about_new_news  # ← ТОЛЬКО ЭТОТ ИМПОРТ!
+
 
 class AuthorList(LoginRequiredMixin, ListView):
     model = Author
@@ -19,6 +21,7 @@ class AuthorList(LoginRequiredMixin, ListView):
     context_object_name = 'authors'
     paginate_by = 15
     login_url = '/accounts/login/'
+
 
 class AuthorDetail(LoginRequiredMixin, DetailView):
     model = Author
@@ -38,6 +41,7 @@ class AuthorDetail(LoginRequiredMixin, DetailView):
 
         return context
 
+
 class PostsList(LoginRequiredMixin, ListView):
     model = Post
     ordering = '-date'
@@ -56,12 +60,14 @@ class PostsList(LoginRequiredMixin, ListView):
         context['filterset'] = self.filterset
         return context
 
+
 class CategoryList(LoginRequiredMixin, ListView):
     model = Category
     ordering = 'category_name'
     template_name = 'categories.html'
     context_object_name = 'categories'
     login_url = '/accounts/login/'
+
 
 class CommentsList(LoginRequiredMixin, ListView):
     model = Comment
@@ -70,11 +76,13 @@ class CommentsList(LoginRequiredMixin, ListView):
     context_object_name = 'comments'
     login_url = '/accounts/login/'
 
+
 class PostDetail(LoginRequiredMixin, DetailView):
     model = Post
     template_name = 'post_detail.html'
     context_object_name = 'post'
     login_url = '/accounts/login/'
+
 
 class PostCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     permission_required = ('News_portal.add_post',)
@@ -84,18 +92,32 @@ class PostCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     success_url = reverse_lazy('sign_home')
     login_url = '/accounts/login/'
 
+    def form_valid(self, form):
+        # Устанавливаем автора как текущего пользователя
+        form.instance.author = self.request.user.author
+
+        # Сохраняем форму
+        response = super().form_valid(form)
+
+        # ОДНА СТРОЧКА - отправляем уведомления подписчикам
+        notify_subscribers_about_new_news(self.object)
+
+        return response
+
+
 class PostUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-    permission_required = ('posts.change_post',)
+    permission_required = ('News_portal.change_post',)
     form_class = PostForm
     model = Post
     template_name = 'post_edit.html'
-    login_url = '/login/'
+    login_url = '/accounts/login/'
 
     def get_success_url(self):
         return reverse_lazy('author_detail', kwargs={'pk': self.object.author.pk})
 
+
 class PostDelete(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
-    permission_required = ('posts.delete_post',)
+    permission_required = ('News_portal.delete_post',)
     model = Post
     template_name = 'post_delete.html'
     login_url = '/accounts/login/'
@@ -107,6 +129,3 @@ class PostDelete(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
         context = super().get_context_data(**kwargs)
         context['post_type'] = self.object.post_type
         return context
-
-
-

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Новый пост в категории {{ category_name }}</title>
+</head>
+<body>
+    <h2>Новый пост в категории "{{ category_name }}"</h2>
+    <p>Здравствуйте, {{ user.username }}!</p>
+    <p>В категории "{{ category_name }}" опубликован новый пост:</p>
+
+    <div style="background: #f5f5f5; padding: 15px; margin: 15px 0;">
+        <h3>{{ news_title }}</h3>
+    </div>
+
+    <p>
+        <a href="{{ news_url }}" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+            Читать пост
+        </a>
+    </p>
+
+    <p>С уважением,<br>Команда сайта</p>
+</body>
+</html>

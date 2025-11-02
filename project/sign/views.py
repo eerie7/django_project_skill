@@ -12,6 +12,12 @@ from django.views.generic import TemplateView
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from News_portal.models import Category, CategorySubscription
+from .tasks import send_news_notification  # Импортируем Celery задачу
+from django.urls import reverse
+from django.core.cache import cache
+import json
+from django.http import JsonResponse
+from django.contrib.auth.decorators import user_passes_test
 
 
 class BaseRegisterView(CreateView):
@@ -147,6 +153,18 @@ def subscribe_category(request, category_id):
     )
     if created:
         print(f"Пользователь {request.user} подписался на {category}")
+
+        # Отправляем приветственное письмо при подписке (асинхронно)
+        try:
+            send_news_notification.delay(
+                request.user.id,
+                f"Добро пожаловать в категорию {category.name}",
+                f"http://127.0.0.1:8000{reverse('category_news', args=[category.id])}"
+            )
+            print(f"Приветственное письмо поставлено в очередь для {request.user.email}")
+        except Exception as e:
+            print(f"Ошибка постановки приветственного письма в очередь: {e}")
+
     return redirect('sign_home')
 
 
@@ -162,3 +180,66 @@ def unsubscribe_category(request, category_id):
         print(f"Пользователь {request.user} отписался от {category}")
 
     return redirect('sign_home')
+
+
+# Дополнительная функция для отправки уведомлений при создании новости
+# Эту функцию нужно будет вызвать из вашего приложения News_portal при создании новости
+def notify_subscribers_about_new_news(news_instance):
+    """
+    Функция для отправки уведомлений подписчикам категории о новой новости
+    Вызывается из приложения News_portal при создании/публикации новости
+    """
+    try:
+        # Получаем категории новости
+        news_categories = news_instance.category.all()
+
+        for category in news_categories:
+            # Получаем всех подписчиков этой категории
+            subscribers = CategorySubscription.objects.filter(category=category)
+
+            for subscription in subscribers:
+                # Отправляем уведомление каждому подписчику асинхронно
+                send_news_notification.delay(
+                    subscription.user.id,
+                    news_instance.title,
+                    f"http://127.0.0.1:8000{news_instance.get_absolute_url()}"
+                )
+
+        print(f"Уведомления о новости '{news_instance.title}' поставлены в очередь")
+
+    except Exception as e:
+        print(f"Ошибка при постановке уведомлений в очередь: {e}")
+
+
+def is_staff_user(user):
+    return user.is_staff
+
+
+@user_passes_test(is_staff_user)
+def celery_monitor_dashboard(request):
+    """Веб-дашборд для мониторинга Celery"""
+    context = {}
+
+    # Собираем статистику
+    context['emails_sent'] = cache.get('task:stats:emails_sent') or 0
+    context['emails_failed'] = cache.get('task:stats:emails_failed') or 0
+    context['notifications_sent'] = cache.get('task:stats:notifications_sent') or 0
+    context['notifications_failed'] = cache.get('task:stats:notifications_failed') or 0
+
+    # Последние логи
+    email_logs = cache.lrange('task:email_logs', 0, 49) or []
+    context['recent_email_logs'] = [log.decode('utf-8') if isinstance(log, bytes) else log for log in email_logs[:10]]
+
+    return render(request, 'sign/celery_monitor.html', context)
+
+
+@user_passes_test(is_staff_user)
+def celery_monitor_api(request):
+    """API для мониторинга (для AJAX)"""
+    stats = {
+        'emails_sent': cache.get('task:stats:emails_sent') or 0,
+        'emails_failed': cache.get('task:stats:emails_failed') or 0,
+        'notifications_sent': cache.get('task:stats:notifications_sent') or 0,
+        'notifications_failed': cache.get('task:stats:notifications_failed') or 0,
+    }
+    return JsonResponse(stats)

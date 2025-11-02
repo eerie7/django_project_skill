@@ -50,7 +50,10 @@ INSTALLED_APPS = [
     # Провайдеры
     'allauth.socialaccount.providers.google',
 
-    'django_apscheduler'
+    'django_apscheduler',
+
+    'django_celery_beat',
+    'django_celery_results'
 ]
 
 SITE_ID = 1
@@ -125,26 +128,51 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ==================== НАСТРОЙКИ ALIAUTH ДЛЯ КРАСИВЫХ СТРАНИЦ ====================
+# ==================== НАСТРОЙКИ REDIS КЕША ====================
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/0',  # ← ИЗМЕНИ НА 0
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
+# Сессии в Redis
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
+
+# ==================== НАСТРОЙКИ CELERY ====================
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Europe/Moscow'
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+# ==================== ОБНОВЛЕННЫЕ НАСТРОЙКИ ALIAUTH (БЕЗ DEPRECATED) ====================
 
 # Перенаправления
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/sign/'  # после входа - на вашу красивую страницу профиля
-ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login/'  # после выхода - на красивую страницу
-LOGOUT_REDIRECT_URL = '/sign/logout-success/'  # дублирующая настройка
+ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login/'  # после выхода - на страницу входа
 
-# Настройки аккаунта
-ACCOUNT_EMAIL_REQUIRED = True
+# ОБНОВЛЕННЫЕ настройки аккаунта (без deprecated предупреждений)
+ACCOUNT_LOGIN_METHODS = {'username', 'email'}  # Заменяет ACCOUNT_AUTHENTICATION_METHOD
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']  # Заменяет ACCOUNT_EMAIL_REQUIRED и ACCOUNT_USERNAME_REQUIRED
 ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_USERNAME_REQUIRED = True  # лучше оставить True для красоты
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email'  # можно входить и по email и по username
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
 
 # Дополнительные настройки для удобства
 ACCOUNT_SESSION_REMEMBER = True  # запоминать пользователя
 ACCOUNT_LOGOUT_ON_GET = True  # выход по GET запросу (для простоты)
-ACCOUNT_EMAIL_SUBJECT_PREFIX = '[Ваш Сайт] '  # префикс для писем
+ACCOUNT_EMAIL_SUBJECT_PREFIX = '[News Portal] '  # префикс для писем
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'  # для разработки
 
 # Кастомные формы для красивых страниц
 ACCOUNT_FORMS = {
@@ -177,8 +205,10 @@ SOCIALACCOUNT_PROVIDERS = {
 # Дополнительные настройки для socialaccount
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_STORE_TOKENS = False
+SOCIALACCOUNT_AUTO_SIGNUP = True  # автоматическая регистрация через социальные сети
 
-# Настройки email
+# ==================== НАСТРОЙКИ EMAIL ====================
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 587
@@ -189,7 +219,57 @@ EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = 'Pozetuve04@yandex.ru'
 SERVER_EMAIL = 'Pozetuve04@yandex.ru'
 
+# ==================== НАСТРОЙКИ APSCHEDULER ====================
+
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
-
-
 APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds
+
+# ==================== ДОПОЛНИТЕЛЬНЫЕ НАСТРОЙКИ ====================
+
+# Логирование для отладки
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'debug.log',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'sign': {  # Логирование для вашего приложения sign
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'celery': {  # Логирование для Celery
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+# Настройки для статических файлов в production (можно добавить позже)
+if not DEBUG:
+    STATIC_ROOT = BASE_DIR / 'staticfiles'
